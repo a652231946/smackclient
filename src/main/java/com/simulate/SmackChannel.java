@@ -17,6 +17,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SmackChannel {
@@ -140,9 +141,21 @@ public class SmackChannel {
     }
 
     public static void main(String[] args) {
-        SmackChannel smackChannel = new SmackChannel();
-        smackChannel.connect("test001", "123456");
-        while (true);
+//        SmackChannel smackChannel = new SmackChannel();
+//        smackChannel.connect("test001", "123456");
+//        while (true);
+        while (true){
+            System.out.println("请输入：");
+            Scanner sc = new Scanner(System.in);
+            String str = sc.nextLine();
+            if(str.equals("exit")) {
+                System.out.println("Bye!");
+                return;
+            }
+            System.out.println(str);
+        }
+
+
 
     }
 
