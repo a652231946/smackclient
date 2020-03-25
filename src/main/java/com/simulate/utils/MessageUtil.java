@@ -47,7 +47,7 @@ public class MessageUtil {
         singleData.setReceived(0);
         singleData.setReceiver(to);
         singleData.setReferTo(new ArrayList<String>());
-        singleData.setRoomID(0);
+        singleData.setRoomID(1000032065);
         singleData.setRp("");
         singleData.setSendTime((int) System.currentTimeMillis());
         singleData.setSender(from);
@@ -73,7 +73,7 @@ public class MessageUtil {
         groupData.setReceived(0);
         groupData.setReceiver(to);
         groupData.setReferTo(new ArrayList<String>());
-        groupData.setRoomID(100001);
+        groupData.setRoomID(1000032065);
         groupData.setRp("");
         groupData.setSendTime((int) System.currentTimeMillis());
         groupData.setSender(from);
@@ -83,4 +83,6 @@ public class MessageUtil {
         message.setBody(JSON.toJSONString(groupData));
         return message;
     }
+
+
 }
