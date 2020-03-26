@@ -3,14 +3,12 @@ package com.simulate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ChatRunner {
 
     private static final Logger log = LoggerFactory.getLogger(ChatRunner.class);
-    private static final ExecutorService executors = Executors.newFixedThreadPool(10000);
 
     static class SubSendMessage implements Runnable {
         SmackChannel smackChannel;
@@ -43,50 +41,18 @@ public class ChatRunner {
         channelConfig.setHost("192.168.0.146");
         channelConfig.setPort(5222);
 
-//        SmackChannel channel = new SmackChannel(channelConfig);
-//        channel.login("test001", "123456");
+        SmackChannel channel = new SmackChannel(channelConfig);
+        channel.login("test001", "123456");
 
-
-        // codm_1080032016
-        ChannelConfig proChannel = new ChannelConfig();
-        proChannel.setDomainName("xcom0015");
-        proChannel.setGroupID("codm_1080032016");
-        proChannel.setGroupSubDomain("conference.xcom0015");
-        proChannel.setHost("192.168.0.9");
-        proChannel.setPort(5222);
-        SmackChannel proSmack = new SmackChannel(proChannel);
-        proSmack.login("cod_60002858", "a123456");
-
-        int count = 0;
-        CountDownLatch countDownLatch;
-        for(int x=0;x<10;x++){
-            countDownLatch = new CountDownLatch(1);
-            for (int i=0;i<100;i++){
-                executors.execute(new SubSendMessage(proSmack, countDownLatch));
+        while (true){
+            System.out.println("请输入：");
+            Scanner sc = new Scanner(System.in);
+            String str = sc.nextLine();
+            if(str.equals("exit")) {
+                System.out.println("Bye!");
+                return;
             }
-            countDownLatch.countDown();
-//            try {
-//                countDownLatch.await();
-//                log.info("第{}批,1000个任务己执行完毕!", x+1);
-//                count = count+1000;
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            channel.sendGroup2Message("group001", str);
         }
-        log.info("结束了..................!{}",count);
-
-//        while (true){
-//            System.out.println("请输入：");
-//            Scanner sc = new Scanner(System.in);
-//            String str = sc.nextLine();
-////            log.info("{}", JSON.toJSONString(str.split("\\s")));
-//            if(str.equals("exit")) {
-//                System.out.println("Bye!");
-//                return;
-//            }
-////            proSmack.sendGroup2Message("codm_1080032016", str);
-//
-//
-//        }
     }
 }

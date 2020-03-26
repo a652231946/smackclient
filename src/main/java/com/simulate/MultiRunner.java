@@ -9,18 +9,22 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiRunner {
     private static final Logger log = LoggerFactory.getLogger(MultiRunner.class);
     private static final ExecutorService executors = Executors.newFixedThreadPool(1000);
+    private static final AtomicInteger count = new AtomicInteger(0);
 
     static class MultiRunnerBuile implements Runnable{
         private SmackChannel smackChannel;
         private CountDownLatch countDownLatch;
+        private CountDownLatch endDownLatch;
         private UserData userData;
 
-        public MultiRunnerBuile(ChannelConfig channelConfig,UserData userData, CountDownLatch countDownLatch) {
+        public MultiRunnerBuile(ChannelConfig channelConfig,UserData userData, CountDownLatch countDownLatch, CountDownLatch endDownLatch) {
             this.countDownLatch = countDownLatch;
+            this.endDownLatch = endDownLatch;
             this.userData = userData;
             this.smackChannel = new SmackChannel(channelConfig);
             this.smackChannel.login(userData.getUserName(), userData.getPasswd());
@@ -31,11 +35,15 @@ public class MultiRunner {
             try {
                 countDownLatch.await();
                 log.info("{}开始发送消息",Thread.currentThread().getName());
-                for (int i=0; i<1000;i++){
-                    smackChannel.sendGroup2Message("codm_1080032016", Thread.currentThread().getName()+"Helo0000000000000000000000");
+                for (int i=0; i<5000;i++){
+                    if(!smackChannel.sendGroupOK("codm_1080032016", Thread.currentThread().getName()+"Helo0000000000000000000000")) {
+                        count.addAndGet(1);
+                    }
                 }
+                endDownLatch.countDown();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("发送消息异常", e);
+//                e.printStackTrace();
             }
         }
     }
@@ -61,12 +69,17 @@ public class MultiRunner {
         userDataList.add(new UserData("cod_60001944","cfa174fc31a0e405211aa50ee391edf0"));
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
+        CountDownLatch endCount = new CountDownLatch(userDataList.size());
         for(UserData userData : userDataList) {
-            executors.execute(new MultiRunnerBuile(proChannel,userData,countDownLatch));
+            executors.execute(new MultiRunnerBuile(proChannel,userData,countDownLatch,endCount));
         }
+        long start = System.currentTimeMillis();
         countDownLatch.countDown();
-        while (true);
-
+//        endCount.await();
+//        long end = System.currentTimeMillis();
+//        long costTime = (end - start) / 1000;
+//         double f =  10*1000 / costTime;
+//        log.info("本次共耗时={}s,失败次数={}, 平均每次发送{}次", costTime, count.get(), f);
 
     }
 }

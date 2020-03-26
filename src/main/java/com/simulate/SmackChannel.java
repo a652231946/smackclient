@@ -142,6 +142,20 @@ public class SmackChannel {
         }
     }
 
+    public boolean sendGroupOK(String to,String message) {
+        try {
+            log.info("开始发送群消息:{}", message);
+            String roomId = to+ "@"+ channelConfig.getGroupSubDomain();
+            MultiUserChat multiUserChat =multiUserChatConcurrentHashMap.get(to);
+//            Message msg =  MessageUtil.generateGroupMessage(this.currentUser,roomId,message);
+            Message msg =  MessageUtil.generateGroupOldMessage(this.currentUser,roomId,message);
+            multiUserChat.sendMessage(msg);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
     public void sendMessage(String to, String message){
         try {
             Chat chat = this.chatManager.chatWith(JidCreate.entityBareFrom(this.createJid(to)));
