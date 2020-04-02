@@ -36,13 +36,20 @@ public class ChatRunner {
 
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.setDomainName("xcom0012");
-        channelConfig.setGroupID("group001");
+        channelConfig.setGroupID("Group001");
         channelConfig.setGroupSubDomain("conference.xcom0012");
-        channelConfig.setHost("192.168.0.146");
+        channelConfig.setHost("127.0.0.1");
         channelConfig.setPort(5222);
 
         SmackChannel channel = new SmackChannel(channelConfig);
-        channel.login("test001", "123456");
+//        channel.xlogin("test001", "a123456");
+        channel.login("test001", "a123456");
+
+//        SmackChannel channel1 = new SmackChannel(channelConfig);
+//        channel1.login("test002", "a123456");
+//
+//        SmackChannel channel2 = new SmackChannel(channelConfig);
+//        channel2.login("test003", "a123456");
 
         while (true){
             System.out.println("请输入：");
@@ -52,7 +59,7 @@ public class ChatRunner {
                 System.out.println("Bye!");
                 return;
             }
-            channel.sendGroup2Message("group001", str);
+//            channel.sendGroup2Message("group001", str);
         }
     }
 }

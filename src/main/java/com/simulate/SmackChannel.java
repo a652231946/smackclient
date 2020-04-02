@@ -1,17 +1,18 @@
 package com.simulate;
 
 
+import com.simulate.data.XHSession;
 import com.simulate.utils.MessageUtil;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.chat2.OutgoingChatMessageListener;
-import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Stanza;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+import org.jivesoftware.smack.sasl.SASLErrorException;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionImpl;
 import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SmackChannel {
 
     private static final Logger log = LoggerFactory.getLogger(SmackChannel.class);
-    private static final ConcurrentHashMap<String, SmackChannel> channelList = new ConcurrentHashMap<String, SmackChannel>();
+    protected static final ConcurrentHashMap<String, SmackChannel> channelList = new ConcurrentHashMap<String, SmackChannel>();
 
     private ChatManager chatManager;
     private ChannelConfig channelConfig;
@@ -45,14 +46,20 @@ public class SmackChannel {
     public void login(String userName, String passwd) {
 
         try {
+//            abstractXMPPConnection.sendNonza();
             currentUser = this.createJid(userName);
             abstractXMPPConnection.login(userName, passwd);
             channelList.put(userName,this);
             log.info("用户={},连接登录成功!", userName);
         } catch (Exception e) {
+            if(e instanceof SASLErrorException){
+                SASLErrorException saslErrorException = (SASLErrorException) e;
+                log.error("result:{}", saslErrorException.getSASLFailure().getDescriptiveText());
+            }
             log.error("连接发生错误:", e.getMessage());
         }
     }
+
 
     private void connect(){
         try{
@@ -68,19 +75,25 @@ public class SmackChannel {
             XMPPTCPConnectionConfiguration config = builder.build();
 
             //建立连接并登陆
-            abstractXMPPConnection = new XMPPTCPConnection(config);
-            abstractXMPPConnection.addStanzaSendingListener(new StanzaListener(){
-                public void processStanza(Stanza stanza) throws SmackException.NotConnectedException, InterruptedException, SmackException.NotLoggedInException {
-                    log.info("in StanzaListener:{}", stanza.getFrom());
-                }
-            }, new StanzaFilter(){
+            XHSession xhSession = new XHSession();
+            xhSession.setUsername("test001");
+            xhSession.setActive("0");
+            xhSession.setChangeDate(99);
+            xhSession.setDescription("fsdfds");
+            xhSession.setDeviceID("fsfds");
+
+            XMPPTCPConnectionImpl xmpptcpConnection =  new XMPPTCPConnectionImpl(config);
+            xmpptcpConnection.setXhSession(xhSession);
+
+            xmpptcpConnection.addStanzaInterceptor(new StanzaListener() {
                 @Override
-                public boolean accept(Stanza st) {
-                    log.info("in StanzaFilter:{}", st.getFrom());
-                    return false;
+                public void processStanza(Stanza packet) throws SmackException.NotConnectedException, InterruptedException, SmackException.NotLoggedInException {
+                        log.info("fdsfdsfds:{}", packet.toXML("").toString());
                 }
-            });
+            },null);
+            abstractXMPPConnection = xmpptcpConnection;
             abstractXMPPConnection.connect();
+
             multiUserChatManager = MultiUserChatManager.getInstanceFor(abstractXMPPConnection);
             MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat(JidCreate.entityBareFrom(channelConfig.getGroupID()+"@"+channelConfig.getGroupSubDomain()));
             multiUserChat.addMessageListener(new MessageListener() {
@@ -115,19 +128,6 @@ public class SmackChannel {
         return to + "@"+ channelConfig.getDomainName();
     }
 
-    public void sendGroupMessage(String to, String message){
-        try {
-            String roomId = to+ "@"+ channelConfig.getGroupSubDomain();
-            Chat chat = this.chatManager.chatWith(JidCreate.entityBareFrom(this.createJid(to)));
-            Message msg =  MessageUtil.generateGroupMessage(this.currentUser,roomId,message);
-//            Message msg =  MessageUtil.generateGroupOldMessage(this.currentUser,roomId,message);
-            chat.send(msg);
-        } catch (Exception e) {
-            System.out.println("发送群消息错误" + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     public void sendGroup2Message(String to,String message) {
         try {
             log.info("开始发送群消息:{}", message);
@@ -153,17 +153,6 @@ public class SmackChannel {
             return true;
         }catch (Exception e){
             return false;
-        }
-    }
-
-    public void sendMessage(String to, String message){
-        try {
-            Chat chat = this.chatManager.chatWith(JidCreate.entityBareFrom(this.createJid(to)));
-            Message msg = MessageUtil.generateSingleMessage(this.currentUser, this.createJid(to),message);
-            chat.send(msg);
-        } catch (Exception e) {
-            System.out.println("发送消息错误" + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -194,32 +183,6 @@ public class SmackChannel {
         return multiUserChat;
     }
 
-
-//    public static void main(String[] args) {
-//        SmackChannel smackChannel = new SmackChannel();
-//        smackChannel.connect("cod_60002858", "a123456");
-//
-//        SmackChannel test002 = new SmackChannel();
-////        test002.connect("cod_60002849", "a123456");
-////        while (true);
-//        while (true){
-//            System.out.println("请输入：");
-//            Scanner sc = new Scanner(System.in);
-//            String str = sc.nextLine();
-//            if(str.equals("exit")) {
-//                System.out.println("Bye!");
-//                return;
-//            }
-////            smackChannel.sendMessage("group001",str);
-////            smackChannel.sendMessage("test002",str);
-////            smackChannel.sendGroupMessage("group001", str);
-////            codm_1080031967@conference.cod.xinhoo.com
-//            smackChannel.sendGroup2Message("codm_1080031967", str);
-//        }
-//
-//
-//
-//    }
 
 
 }

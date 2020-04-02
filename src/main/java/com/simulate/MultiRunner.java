@@ -35,7 +35,7 @@ public class MultiRunner {
             try {
                 countDownLatch.await();
                 log.info("{}开始发送消息",Thread.currentThread().getName());
-                for (int i=0; i<5000;i++){
+                for (int i=0; i<2;i++){
                     if(!smackChannel.sendGroupOK("codm_1080032016", Thread.currentThread().getName()+"Helo0000000000000000000000")) {
                         count.addAndGet(1);
                     }
@@ -57,16 +57,16 @@ public class MultiRunner {
 
         List<UserData> userDataList = new ArrayList<UserData>();
         userDataList.add(new UserData("cod_60002850","ff4913d7c5388b2fbd86e9820818e346"));
-        userDataList.add(new UserData("cod_60002858","a123456"));
-        userDataList.add(new UserData("cod_60001793","e7bd83bc8cd963b2350e407be0af08f3"));
-        userDataList.add(new UserData("cod_60000018","cbb6d7c11a2aeaf734ea84e87f360a60"));
-        userDataList.add(new UserData("cod_60000161","0564efad78ee91abc2c072f12606a335"));
-        userDataList.add(new UserData("cod_60000051","4d896dcb668251ece2aa0d5baca3c7ba"));
-        userDataList.add(new UserData("cod_60000044","f6d10e6ce80ac6fa614d144ca8951b53"));
-        userDataList.add(new UserData("cod_60000002","66c76c3ae1eb3eedd88bbb76d0ae8aed"));
-        userDataList.add(new UserData("cod_60000001","fbc3752e68b5709db0c2fd7230212e67"));
-        userDataList.add(new UserData("cod_60000022","cfa174fc31a0e405211aa50ee391edf0"));
-        userDataList.add(new UserData("cod_60001944","cfa174fc31a0e405211aa50ee391edf0"));
+//        userDataList.add(new UserData("cod_60002858","a123456"));
+//        userDataList.add(new UserData("cod_60001793","e7bd83bc8cd963b2350e407be0af08f3"));
+//        userDataList.add(new UserData("cod_60000018","cbb6d7c11a2aeaf734ea84e87f360a60"));
+//        userDataList.add(new UserData("cod_60000161","0564efad78ee91abc2c072f12606a335"));
+//        userDataList.add(new UserData("cod_60000051","4d896dcb668251ece2aa0d5baca3c7ba"));
+//        userDataList.add(new UserData("cod_60000044","f6d10e6ce80ac6fa614d144ca8951b53"));
+//        userDataList.add(new UserData("cod_60000002","66c76c3ae1eb3eedd88bbb76d0ae8aed"));
+//        userDataList.add(new UserData("cod_60000001","fbc3752e68b5709db0c2fd7230212e67"));
+//        userDataList.add(new UserData("cod_60000022","cfa174fc31a0e405211aa50ee391edf0"));
+//        userDataList.add(new UserData("cod_60001944","cfa174fc31a0e405211aa50ee391edf0"));
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
         CountDownLatch endCount = new CountDownLatch(userDataList.size());
